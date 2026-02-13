@@ -173,8 +173,8 @@ jobs:
         run: pip install twine
       - name: Debug dist directory
         run: ls -la dist/
-      - name: Publish to PyPI
-        run: twine upload --skip-existing dist/*
+      - name: Publish to PyPI (debug)
+        run: twine upload --verbose --skip-existing dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
@@ -194,4 +194,4 @@ jobs:
             {{formulaName}} {{version}}
             https://github.com/Liam-Deacon/latest-version/releases/tag/{{tag}}
         env:
-          COMMITTER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMITTER_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
