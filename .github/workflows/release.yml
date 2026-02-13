@@ -17,7 +17,7 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: latest-version
-          features: ""
+          features: "clap"
           target: x86_64-unknown-linux-gnu
           tar: none
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -37,7 +37,7 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: latest-version
-          features: ""
+          features: "clap"
           target: ${{ matrix.target }}
           tar: none
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -57,7 +57,7 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: latest-version
-          features: ""
+          features: "clap"
           target: ${{ matrix.target }}
           tar: none
           token: ${{ secrets.GITHUB_TOKEN }}
