@@ -14,13 +14,13 @@ jobs:
         with:
           toolchain: stable
       - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/upload-rust-binary-action@v1
+      - name: Build
+        run: cargo build --release --bin latest-version --features clap --target x86_64-unknown-linux-gnu
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
-          bin: latest-version
-          features: "clap"
-          target: x86_64-unknown-linux-gnu
-          tar: none
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: latest-version-x86_64-unknown-linux-gnu
+          path: target/x86_64-unknown-linux-gnu/release/latest-version
 
   build-macos:
     runs-on: macos-latest
@@ -34,13 +34,13 @@ jobs:
           toolchain: stable
           targets: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/upload-rust-binary-action@v1
+      - name: Build
+        run: cargo build --release --bin latest-version --features clap --target ${{ matrix.target }}
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
-          bin: latest-version
-          features: "clap"
-          target: ${{ matrix.target }}
-          tar: none
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: latest-version-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/latest-version
 
   build-windows:
     runs-on: windows-latest
@@ -54,23 +54,78 @@ jobs:
           toolchain: stable
           targets: ${{ matrix.target }}
       - uses: Swatinem/rust-cache@v2
-      - uses: taiki-e/upload-rust-binary-action@v1
+      - name: Build
+        run: cargo build --release --bin latest-version --features clap --target ${{ matrix.target }}
+      - name: Upload
+        uses: actions/upload-artifact@v4
         with:
-          bin: latest-version
-          features: "clap"
-          target: ${{ matrix.target }}
-          tar: none
-          token: ${{ secrets.GITHUB_TOKEN }}
+          name: latest-version-${{ matrix.target }}
+          path: target/${{ matrix.target }}/release/latest-version.exe
 
   create-release:
     runs-on: ubuntu-latest
     needs: [build-linux, build-macos, build-windows]
     steps:
       - uses: actions/checkout@v4
-      - uses: taiki-e/create-gh-release-action@v1
+      - uses: actions/download-artifact@v4
         with:
-          changelog: CHANGELOG.md
-          token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: latest-version-*
+          path: artifacts
+      - name: Create Release
+        uses: actions/create-release@v1
+        id: create_release
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Linux binary
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/latest-version-x86_64-unknown-linux-gnu/latest-version
+          asset_name: latest-version-x86_64-unknown-linux-gnu
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload macOS x86_64 binary
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/latest-version-x86_64-apple-darwin/latest-version
+          asset_name: latest-version-x86_64-apple-darwin
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload macOS arm64 binary
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/latest-version-aarch64-apple-darwin/latest-version
+          asset_name: latest-version-aarch64-apple-darwin
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Windows x86_64 binary
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/latest-version-x86_64-pc-windows-msvc/latest-version.exe
+          asset_name: latest-version-x86_64-pc-windows-msvc.exe
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Windows i686 binary
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/latest-version-i686-pc-windows-msvc/latest-version.exe
+          asset_name: latest-version-i686-pc-windows-msvc.exe
+          asset_content_type: application/octet-stream
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-pypi:
     runs-on: ubuntu-latest
