@@ -17,9 +17,10 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: latest-version
-          args: --no-default-features
+          features: ""
           target: x86_64-unknown-linux-gnu
           tar: none
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build-macos:
     runs-on: macos-latest
@@ -36,9 +37,10 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: latest-version
-          args: --no-default-features
+          features: ""
           target: ${{ matrix.target }}
           tar: none
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build-windows:
     runs-on: windows-latest
@@ -55,9 +57,10 @@ jobs:
       - uses: taiki-e/upload-rust-binary-action@v1
         with:
           bin: latest-version
-          args: --no-default-features
+          features: ""
           target: ${{ matrix.target }}
           tar: none
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   create-release:
     runs-on: ubuntu-latest
