@@ -180,8 +180,8 @@ jobs:
         with:
           repository: Liam-Deacon/homebrew-tap
           ref: main
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: homebrew-tap
+          ssh-key: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Update latest-version formula
         run: |
           cd homebrew-tap
