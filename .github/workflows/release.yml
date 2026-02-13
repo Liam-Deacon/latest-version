@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  packages: write  # For publishing to GitHub Packages if needed
+  pull-requests: write  # For creating pull requests in the Homebrew tap
 
 jobs:
   build-linux:
@@ -192,4 +194,4 @@ jobs:
             {{formulaName}} {{version}}
             https://github.com/Liam-Deacon/latest-version/releases/tag/{{tag}}
         env:
-          COMMITTER_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          COMMITTER_TOKEN: ${{ secrets.GITHUB_TOKEN }}
