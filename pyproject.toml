@@ -13,6 +13,9 @@ classifiers = [
 Homepage = "https://github.com/Liam-Deacon/latest-version"
 Repository = "https://github.com/Liam-Deacon/latest-version"
 
+[project.scripts]
+latest-version = "latest_version.__main__:main"
+
 [tool.maturin]
 features = ["pyo3"]
 module-name = "latest_version._latest_version"
