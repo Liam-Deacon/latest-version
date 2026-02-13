@@ -1,0 +1,30 @@
+[package]
+name = "latest-version"
+version = "0.1.0"
+edition = "2021"
+description = "Find the latest version of commands across all available paths"
+readme = "README.md"
+license = "MIT"
+repository = "https://github.com/Liam-Deacon/latest-version"
+keywords = ["version", "find", "latest"]
+categories = ["command-line-utilities", "development-tools"]
+
+[lib]
+name = "latest_version"
+crate-type = ["cdylib"]
+
+[dependencies]
+clap = { version = "4.5.1", features = ["derive"], optional = true }
+which = "6.0.1"
+semver = "1.0.23"
+version-compare = "0.2.0"
+thiserror = "1.0.57"
+regex = "1.10.2"
+pyo3 = { version = "0.21.2", features = ["extension-module"], optional = true }
+
+
+
+[[bin]]
+name = "latest-version"
+path = "src/main.rs"
+required-features = ["clap"]

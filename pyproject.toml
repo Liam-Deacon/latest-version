@@ -1,0 +1,22 @@
+[project]
+name = "latest-version"
+version = "0.1.0"
+description = "Find the latest version of commands across all available paths"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+]
+
+[project.urls]
+Homepage = "https://github.com/Liam-Deacon/latest-version"
+Repository = "https://github.com/Liam-Deacon/latest-version"
+
+[tool.maturin]
+features = ["pyo3"]
+module-name = "latest_version._latest_version"
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"

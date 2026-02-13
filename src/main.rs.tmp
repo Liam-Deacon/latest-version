@@ -1,0 +1,37 @@
+fn find_executables(command: &str) -> Result<Vec<String>, LatestVersionError> {
+    let path = std::env::var("PATH").map_err(|e| LatestVersionError::PathFindingError(e.to_string()))?;
+    
+    let mut executables = Vec::new();
+    
+    for dir in path.split(std::path::MAIN_SEPARATOR) {
+        if dir.is_empty() {
+            continue;
+        }
+        
+        let command_path = std::path::Path::new(dir).join(command);
+        
+        if command_path.is_file() && command_path.exists() {
+            match std::fs::metadata(&command_path) {
+                Ok(metadata) => {
+                    #[cfg(unix)]
+                    let is_executable = metadata.permissions().mode() & 0o111 != 0;
+                    #[cfg(windows)]
+                    let is_executable = command_path.extension().map_or(false, |ext| ext.eq_ignore_ascii_case(b"exe") || ext.eq_ignore_ascii_case(b"com") || ext.eq_ignore_ascii_case(b"bat"));
+                    
+                    if is_executable {
+                        if let Some(found_str) = command_path.to_str() {
+                            executables.push(found_str.to_string());
+                        }
+                    }
+                },
+                Err(_) => continue,
+            }
+        }
+    }
+    
+    if executables.is_empty() {
+        return Err(LatestVersionError::CommandNotFound(command.to_string()));
+    }
+    
+    Ok(executables)
+}
