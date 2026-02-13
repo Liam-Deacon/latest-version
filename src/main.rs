@@ -1,5 +1,6 @@
 use clap::Parser;
 use semver::Version;
+#[cfg(unix)]
 use std::os::unix::fs::PermissionsExt;
 use std::process::{Command, Output};
 use thiserror::Error;
@@ -46,7 +47,10 @@ fn find_executables(command: &str) -> Result<Vec<String>, LatestVersionError> {
         if command_path.is_file() && command_path.exists() {
             match command_path.metadata() {
                 Ok(metadata) => {
+                    #[cfg(unix)]
                     let is_executable = metadata.permissions().mode() & 0o111 != 0;
+                    #[cfg(windows)]
+                    let is_executable = true; // Assume all files are executable on Windows
 
                     if is_executable {
                         if let Some(found_str) = command_path.to_str() {
