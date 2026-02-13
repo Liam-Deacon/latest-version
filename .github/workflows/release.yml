@@ -158,14 +158,19 @@ jobs:
         with:
           python-version: "3.9"
           architecture: x64
-      - name: Install cibuildwheel
-        run: pip install cibuildwheel
+      - name: Install maturin
+        run: pip install maturin
       - name: Build wheels
-        run: cibuildwheel --platform linux --output-dir wheelhouse
+        uses: PyO3/maturin-action@v1
+        with:
+          maturin-version: "latest"
+          command: build
+          args: --release --out dist --interpreter 3.8 3.9 3.10 3.11 3.12
+          manylinux: auto
       - name: Install twine
         run: pip install twine
       - name: Publish to PyPI
-        run: twine upload --skip-existing wheelhouse/*
+        run: twine upload --skip-existing dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
@@ -181,7 +186,7 @@ jobs:
           repository: Liam-Deacon/homebrew-tap
           ref: main
           path: homebrew-tap
-          ssh-key: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Update latest-version formula
         run: |
           cd homebrew-tap
