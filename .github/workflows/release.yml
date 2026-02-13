@@ -169,6 +169,8 @@ jobs:
           manylinux: auto
       - name: Install twine
         run: pip install twine
+      - name: Debug dist directory
+        run: ls -la dist/
       - name: Publish to PyPI
         run: twine upload --skip-existing dist/*
         env:
@@ -180,46 +182,14 @@ jobs:
     needs: [create-release]
     steps:
       - uses: actions/checkout@v4
-      - name: Checkout homebrew-tap
-        uses: actions/checkout@v4
-        with:
-          repository: Liam-Deacon/homebrew-tap
-          ref: main
-          path: homebrew-tap
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
       - name: Update latest-version formula
-        run: |
-          cd homebrew-tap
-          # Calculate the sha256 of the latest release asset
-          LATEST_VERSION=$(echo ${{ github.ref }} | sed 's/refs\/tags\/v//')
-          ASSET_URL="https://github.com/Liam-Deacon/latest-version/releases/download/v${LATEST_VERSION}/latest-version-x86_64-unknown-linux-gnu.bin"
-          SHA256=$(curl -L "$ASSET_URL" | sha256sum | awk '{print $1}')
-          
-          # Update the formula
-          cat > Formula/latest-version.rb <<- EOF
-          class LatestVersion < Formula
-            desc "Find the latest version of commands across all available paths"
-            homepage "https://github.com/Liam-Deacon/latest-version"
-            url "https://github.com/Liam-Deacon/latest-version/releases/download/v${LATEST_VERSION}/latest-version-x86_64-unknown-linux-gnu.bin"
-            sha256 "${SHA256}"
-            version "${LATEST_VERSION}"
-            
-            def install
-              bin.install "latest-version-x86_64-unknown-linux-gnu.bin" => "latest-version"
-            end
-            
-            test do
-              system "#{bin}/latest-version", "--help"
-            end
-          end
-          EOF
-          
-          # Commit and push the change
-          git status
-          git add Formula/latest-version.rb
-          git config user.email "liam@example.com"
-          git config user.name "Liam Deacon"
-          git commit -m "Update latest-version to v${LATEST_VERSION}"
-          git push origin main
+        uses: mislav/bump-homebrew-formula-action@v3
+        with:
+          formula-name: latest-version
+          formula-path: Formula/latest-version.rb
+          homebrew-tap: Liam-Deacon/homebrew-tap
+          commit-message: |
+            {{formulaName}} {{version}}
+            https://github.com/Liam-Deacon/latest-version/releases/tag/{{tag}}
         env:
-          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          COMMITTER_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
