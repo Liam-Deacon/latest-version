@@ -158,19 +158,14 @@ jobs:
         with:
           python-version: "3.9"
           architecture: x64
-      - name: Install maturin
-        run: pip install maturin
+      - name: Install cibuildwheel
+        run: pip install cibuildwheel
       - name: Build wheels
-        uses: PyO3/maturin-action@v1
-        with:
-          maturin-version: "latest"
-          command: build
-          args: --release --out dist --interpreter 3.8 3.9 3.10 3.11 3.12
-          manylinux: auto
+        run: cibuildwheel --platform linux --output-dir wheelhouse
       - name: Install twine
         run: pip install twine
       - name: Publish to PyPI
-        run: twine upload --skip-existing dist/*
+        run: twine upload --skip-existing wheelhouse/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
@@ -180,15 +175,13 @@ jobs:
     needs: [create-release]
     steps:
       - uses: actions/checkout@v4
-      - name: Configure GitHub CLI
-        run: |
-          gh auth login --with-token <<< "${{ secrets.PERSONAL_ACCESS_TOKEN }}"
-          gh config set prompt disabled
       - name: Checkout homebrew-tap
-        run: |
-          git clone https://github.com/Liam-Deacon/homebrew-tap.git
-          cd homebrew-tap
-          git remote set-url origin https://x-access-token:${{ secrets.PERSONAL_ACCESS_TOKEN }}@github.com/Liam-Deacon/homebrew-tap.git
+        uses: actions/checkout@v4
+        with:
+          repository: Liam-Deacon/homebrew-tap
+          ref: main
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: homebrew-tap
       - name: Update latest-version formula
         run: |
           cd homebrew-tap
@@ -224,4 +217,4 @@ jobs:
           git commit -m "Update latest-version to v${LATEST_VERSION}"
           git push origin main
         env:
-          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
