@@ -71,61 +71,25 @@ jobs:
         with:
           pattern: latest-version-*
           path: artifacts
+      - name: Rename artifacts
+        run: |
+          mv artifacts/latest-version-x86_64-unknown-linux-gnu/latest-version artifacts/latest-version-x86_64-unknown-linux-gnu
+          mv artifacts/latest-version-x86_64-apple-darwin/latest-version artifacts/latest-version-x86_64-apple-darwin
+          mv artifacts/latest-version-aarch64-apple-darwin/latest-version artifacts/latest-version-aarch64-apple-darwin
+          mv artifacts/latest-version-x86_64-pc-windows-msvc/latest-version.exe artifacts/latest-version-x86_64-pc-windows-msvc.exe
+          mv artifacts/latest-version-i686-pc-windows-msvc/latest-version.exe artifacts/latest-version-i686-pc-windows-msvc.exe
       - name: Create Release
-        uses: actions/create-release@v1
-        id: create_release
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          draft: false
-          prerelease: false
+        run: |
+          gh release create ${{ github.ref_name }} \
+            --title "${{ github.ref_name }}" \
+            --notes "Release ${{ github.ref_name }}" \
+            artifacts/latest-version-x86_64-unknown-linux-gnu \
+            artifacts/latest-version-x86_64-apple-darwin \
+            artifacts/latest-version-aarch64-apple-darwin \
+            artifacts/latest-version-x86_64-pc-windows-msvc.exe \
+            artifacts/latest-version-i686-pc-windows-msvc.exe
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload Linux binary
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/latest-version-x86_64-unknown-linux-gnu/latest-version
-          asset_name: latest-version-x86_64-unknown-linux-gnu
-          asset_content_type: application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload macOS x86_64 binary
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/latest-version-x86_64-apple-darwin/latest-version
-          asset_name: latest-version-x86_64-apple-darwin
-          asset_content_type: application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload macOS arm64 binary
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/latest-version-aarch64-apple-darwin/latest-version
-          asset_name: latest-version-aarch64-apple-darwin
-          asset_content_type: application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload Windows x86_64 binary
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/latest-version-x86_64-pc-windows-msvc/latest-version.exe
-          asset_name: latest-version-x86_64-pc-windows-msvc.exe
-          asset_content_type: application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Upload Windows i686 binary
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./artifacts/latest-version-i686-pc-windows-msvc/latest-version.exe
-          asset_name: latest-version-i686-pc-windows-msvc.exe
-          asset_content_type: application/octet-stream
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-pypi:
     runs-on: ubuntu-latest
